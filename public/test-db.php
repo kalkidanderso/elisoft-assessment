@@ -11,19 +11,37 @@
 
 // Helper function to get environment variable from multiple sources
 function getEnvVar($key, $default = null) {
+    // Also try underscore version (Docker-friendly)
+    $underscoreKey = str_replace('.', '_', $key);
+    
     // Check $_ENV first (Render uses this)
     if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
         return $_ENV[$key];
     }
+    if ($underscoreKey !== $key && isset($_ENV[$underscoreKey]) && $_ENV[$underscoreKey] !== '') {
+        return $_ENV[$underscoreKey];
+    }
+    
     // Check $_SERVER
     if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
         return $_SERVER[$key];
     }
+    if ($underscoreKey !== $key && isset($_SERVER[$underscoreKey]) && $_SERVER[$underscoreKey] !== '') {
+        return $_SERVER[$underscoreKey];
+    }
+    
     // Check getenv()
     $value = getenv($key);
     if ($value !== false && $value !== '') {
         return $value;
     }
+    if ($underscoreKey !== $key) {
+        $value = getenv($underscoreKey);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+    }
+    
     return $default;
 }
 
