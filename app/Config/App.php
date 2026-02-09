@@ -20,7 +20,7 @@ class App extends BaseConfig
 
     public function __construct()
     {
-        $this->baseURL = env('app.baseURL', 'http://localhost:8080/');
+        $this->baseURL = env('app.baseURL', 'https://elisoft-assessment-2.onrender.com/');
     }
 
     /**
