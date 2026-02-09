@@ -22,6 +22,10 @@ COPY . .
 # Ensure .env exists for CodeIgniter (fallback to 'env' file)
 RUN if [ ! -f .env ]; then cp env .env; fi
 
+# Ensure writable directories exist and have proper permissions
+RUN mkdir -p writable/cache writable/logs writable/session writable/uploads \
+    && chmod -R 777 writable
+
 ENV CI_ENVIRONMENT=production
 
 CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public"]
