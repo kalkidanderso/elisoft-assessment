@@ -9,6 +9,24 @@
  * 3. Whether demo users exist
  */
 
+// Helper function to get environment variable from multiple sources
+function getEnvVar($key, $default = null) {
+    // Check $_ENV first (Render uses this)
+    if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
+        return $_ENV[$key];
+    }
+    // Check $_SERVER
+    if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+        return $_SERVER[$key];
+    }
+    // Check getenv()
+    $value = getenv($key);
+    if ($value !== false && $value !== '') {
+        return $value;
+    }
+    return $default;
+}
+
 // Read .env file if it exists (for local testing)
 $envFile = __DIR__ . '/../.env';
 if (file_exists($envFile)) {
@@ -19,8 +37,8 @@ if (file_exists($envFile)) {
             list($key, $value) = explode('=', $line, 2);
             $key = trim($key);
             $value = trim($value, " \t\n\r\0\x0B'\"");
-            if (!getenv($key)) {
-                putenv("$key=$value");
+            if (!getEnvVar($key)) {
+                $_ENV[$key] = $value;
             }
         }
     }
@@ -33,25 +51,35 @@ echo "<hr>";
 
 // Get environment variables
 echo "<h2>1. Environment Variables</h2>";
-echo "CI_ENVIRONMENT: " . (getenv('CI_ENVIRONMENT') ?: 'not set') . "<br>";
-echo "DB Driver: " . (getenv('database.default.DBDriver') ?: 'not set') . "<br>";
-echo "DB Host: " . (getenv('database.default.hostname') ?: 'not set') . "<br>";
-echo "DB Name: " . (getenv('database.default.database') ?: 'not set') . "<br>";
-echo "DB User: " . (getenv('database.default.username') ?: 'not set') . "<br>";
-echo "DB Port: " . (getenv('database.default.port') ?: 'not set') . "<br>";
+echo "CI_ENVIRONMENT: " . (getEnvVar('CI_ENVIRONMENT') ?: 'not set') . "<br>";
+echo "DB Driver: " . (getEnvVar('database.default.DBDriver') ?: 'not set') . "<br>";
+echo "DB Host: " . (getEnvVar('database.default.hostname') ?: 'not set') . "<br>";
+echo "DB Name: " . (getEnvVar('database.default.database') ?: 'not set') . "<br>";
+echo "DB User: " . (getEnvVar('database.default.username') ?: 'not set') . "<br>";
+echo "DB Port: " . (getEnvVar('database.default.port') ?: 'not set') . "<br>";
 echo "<hr>";
 
 // Test database connection
 echo "<h2>2. Database Connection Test</h2>";
 try {
-    $dbHost = getenv('database.default.hostname');
-    $dbName = getenv('database.default.database');
-    $dbUser = getenv('database.default.username');
-    $dbPass = getenv('database.default.password');
-    $dbPort = getenv('database.default.port') ?: '5432';
-    $dbDriver = getenv('database.default.DBDriver') ?: 'Postgre';
+    $dbHost = getEnvVar('database.default.hostname');
+    $dbName = getEnvVar('database.default.database');
+    $dbUser = getEnvVar('database.default.username');
+    $dbPass = getEnvVar('database.default.password');
+    $dbPort = getEnvVar('database.default.port') ?: '5432';
+    $dbDriver = getEnvVar('database.default.DBDriver') ?: 'Postgre';
     
     if (!$dbHost || !$dbName || !$dbUser) {
+        echo "<strong style='color:orange'>⚠️ Missing database configuration in environment variables!</strong><br><br>";
+        echo "<p>Check Render Dashboard → Web Service → Environment tab and verify these are set:</p>";
+        echo "<ul>";
+        echo "<li>database.default.DBDriver</li>";
+        echo "<li>database.default.hostname</li>";
+        echo "<li>database.default.database</li>";
+        echo "<li>database.default.username</li>";
+        echo "<li>database.default.password</li>";
+        echo "<li>database.default.port</li>";
+        echo "</ul>";
         throw new Exception("Missing database configuration in environment variables!");
     }
     

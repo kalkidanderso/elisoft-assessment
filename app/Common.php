@@ -13,3 +13,35 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+if (! function_exists('env')) {
+    /**
+     * Override CodeIgniter's env() function to support Render's environment variables
+     * Render sets environment variables in $_ENV, not just getenv()
+     *
+     * @param string $key
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function env(string $key, $default = null)
+    {
+        // Check $_ENV first (Render uses this)
+        if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
+            return $_ENV[$key];
+        }
+
+        // Check $_SERVER
+        if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+            return $_SERVER[$key];
+        }
+
+        // Check getenv() as fallback
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+
+        return $default;
+    }
+}
