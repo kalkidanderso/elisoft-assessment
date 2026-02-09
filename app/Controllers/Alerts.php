@@ -10,7 +10,7 @@ class Alerts extends BaseController
         $alerts = $db->table('alerts a')
             ->select('a.*, b.beneficiary_id, b.full_name')
             ->join('beneficiaries b', 'b.id = a.beneficiary_id')
-            ->where('a.is_resolved', 0)
+            ->where('a.is_resolved', false)
             ->orderBy('a.created_at', 'DESC')
             ->get()
             ->getResultArray();
@@ -30,7 +30,7 @@ class Alerts extends BaseController
         $db->table('alerts')
             ->where('id', $id)
             ->update([
-                'is_resolved' => 1,
+                'is_resolved' => true,
                 'resolved_at' => date('Y-m-d H:i:s'),
             ]);
 
@@ -58,7 +58,7 @@ class Alerts extends BaseController
             $exists = $db->table('alerts')
                 ->where('beneficiary_id', $row['beneficiary_id'])
                 ->where('alert_type', 'overdue_followup')
-                ->where('is_resolved', 0)
+                ->where('is_resolved', false)
                 ->countAllResults();
 
             if ($exists) {
@@ -70,7 +70,7 @@ class Alerts extends BaseController
                 'alert_type' => 'overdue_followup',
                 'message' => 'Overdue follow-up. Follow-up date was ' . $row['follow_up_date'],
                 'priority' => 'high',
-                'is_resolved' => 0,
+                'is_resolved' => false,
             ]);
             $created++;
         }
@@ -87,7 +87,7 @@ class Alerts extends BaseController
             $exists = $db->table('alerts')
                 ->where('beneficiary_id', $row['beneficiary_id'])
                 ->where('alert_type', 'high_risk')
-                ->where('is_resolved', 0)
+                ->where('is_resolved', false)
                 ->countAllResults();
 
             if ($exists) {
@@ -117,7 +117,7 @@ class Alerts extends BaseController
             $exists = $db->table('alerts')
                 ->where('beneficiary_id', $row['beneficiary_id'])
                 ->where('alert_type', 'missing_data')
-                ->where('is_resolved', 0)
+                ->where('is_resolved', false)
                 ->countAllResults();
 
             if ($exists) {
@@ -129,7 +129,7 @@ class Alerts extends BaseController
                 'alert_type' => 'missing_data',
                 'message' => 'Missing baseline & socioeconomic information.',
                 'priority' => 'medium',
-                'is_resolved' => 0,
+                'is_resolved' => false,
             ]);
             $created++;
         }
