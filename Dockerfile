@@ -19,6 +19,9 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 COPY . .
 
+# Ensure .env exists for CodeIgniter (fallback to 'env' file)
+RUN if [ ! -f .env ]; then cp env .env; fi
+
 ENV CI_ENVIRONMENT=production
 
 CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t public"]
