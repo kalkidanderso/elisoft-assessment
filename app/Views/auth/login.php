@@ -194,13 +194,7 @@
                     </button>
                 </form>
                 
-                <div class="mt-4 text-center">
-                    <small class="text-muted">
-                        <strong>Demo Credentials:</strong><br>
-                        Admin: <code>admin / password</code><br>
-                        User: <code>user / password</code>
-                    </small>
-                </div>
+
             </div>
         </div>
     </div>
