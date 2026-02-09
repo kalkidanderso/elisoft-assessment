@@ -18,6 +18,7 @@ if (! function_exists('env')) {
     /**
      * Override CodeIgniter's env() function to support Render's environment variables
      * Render sets environment variables in $_ENV, not just getenv()
+     * Also, Docker doesn't reliably pass variables with dots, so we check underscore versions too
      *
      * @param string $key
      * @param mixed  $default
@@ -26,20 +27,35 @@ if (! function_exists('env')) {
      */
     function env(string $key, $default = null)
     {
+        // Also try underscore version (Docker-friendly)
+        $underscoreKey = str_replace('.', '_', $key);
+        
         // Check $_ENV first (Render uses this)
         if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
             return $_ENV[$key];
+        }
+        if ($underscoreKey !== $key && isset($_ENV[$underscoreKey]) && $_ENV[$underscoreKey] !== '') {
+            return $_ENV[$underscoreKey];
         }
 
         // Check $_SERVER
         if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
             return $_SERVER[$key];
         }
+        if ($underscoreKey !== $key && isset($_SERVER[$underscoreKey]) && $_SERVER[$underscoreKey] !== '') {
+            return $_SERVER[$underscoreKey];
+        }
 
         // Check getenv() as fallback
         $value = getenv($key);
         if ($value !== false && $value !== '') {
             return $value;
+        }
+        if ($underscoreKey !== $key) {
+            $value = getenv($underscoreKey);
+            if ($value !== false && $value !== '') {
+                return $value;
+            }
         }
 
         return $default;
